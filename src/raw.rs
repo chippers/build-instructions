@@ -9,31 +9,31 @@ use crate::core::Prefix;
 type Result = std::io::Result<()>;
 
 #[derive(Debug)]
-pub struct Cargo(Prefix);
+pub struct Cargo {
+    inner: Prefix,
+}
 
 impl Default for Cargo {
     #[inline(always)]
     fn default() -> Self {
-        Self(Prefix { prefix: Cow::Borrowed("cargo:"), ..Default::default() })
+        Self { inner: Prefix { prefix: Cow::Borrowed("cargo:"), ..Default::default() } }
     }
 }
 
 impl AsRef<Prefix> for Cargo {
     #[inline(always)]
     fn as_ref(&self) -> &Prefix {
-        &self.0
+        &self.inner
     }
 }
 
 /// Write content to [`Out`], automatically handling implementation details.
 macro_rules! out {
     ($self:ident, $($arg:tt)*) => {{
-        let out = &mut $self.0.out;
-
-        // ensure that no writes to stdout happen between the prefix and instruction
+        let out = &mut $self.inner.out;
         let lock = out.lock();
 
-        write!(out, "{}", $self.0.prefix)?;
+        write!(out, "{}", $self.inner.prefix)?;
         writeln!(out, $($arg)*)?;
         drop(lock);
 
@@ -45,75 +45,75 @@ impl Cargo {
     /// Turn [`Cargo`] into the [`Prefix`] it was wrapping.
     #[inline(always)]
     pub fn into_inner(self) -> Prefix {
-        self.0
+        self.inner
     }
 
     /// Tells Cargo when to re-run the script.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-changed
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-changed>
     pub fn rerun_if_changed(&mut self, path: impl Display) -> Result {
         out!(self, "rerun-if-changed={path}")
     }
 
     /// Tells Cargo when to re-run the script.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-env-changed
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-env-changed>
     pub fn rerun_if_env_changed(&mut self, var: impl Display) -> Result {
         out!(self, "rerun-if-env-changed={var}")
     }
 
     /// Passes custom flags to a linker for benchmarks, binaries, cdylib crates, examples, and tests.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg>
     pub fn rustc_link_arg(&mut self, flag: impl Display) -> Result {
         out!(self, "rustc-link-arg={flag}")
     }
 
     /// Passes custom flags to a linker for the binary `bin`.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-bin
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-bin>
     pub fn rustc_link_arg_bin(&mut self, bin: impl Display, flag: impl Display) -> Result {
         out!(self, "rustc-link-arg-bin={bin}={flag}")
     }
 
     /// Passes custom flags to a linker for binaries.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-bins
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-bins>
     pub fn rustc_link_arg_bins(&mut self, flag: impl Display) -> Result {
         out!(self, "rustc-link-arg-bins={flag}")
     }
 
     /// Passes custom flags to a linker for tests.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-tests
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-tests>
     pub fn rustc_link_arg_tests(&mut self, flag: impl Display) -> Result {
         out!(self, "rustc-link-arg-tests={flag}")
     }
 
     /// Passes custom flags to a linker for examples.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-examples
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-examples>
     pub fn rustc_link_arg_examples(&mut self, flag: impl Display) -> Result {
         out!(self, "rustc-link-arg-examples={flag}")
     }
 
     /// Passes custom flags to a linker for benchmarks.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-benches
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg-benches>
     pub fn rustc_link_arg_benches(&mut self, flag: impl Display) -> Result {
         out!(self, "rustc-link-arg-benches={flag}")
     }
 
     /// Adds a library to link.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib>
     pub fn rustc_link_lib(&mut self, lib: impl Display) -> Result {
         out!(self, "rustc-link-lib={lib}")
     }
 
     /// Adds to the library search path.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-search
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-search>
     pub fn rustc_link_search(&mut self, kind: Option<impl Display>, path: impl Display) -> Result {
         match kind {
             Some(kind) => out!(self, "rustc-link-search={kind}={path}"),
@@ -123,14 +123,14 @@ impl Cargo {
 
     /// Passes certain flags to the compiler.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-flags
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-flags>
     pub fn rustc_flags(&mut self, flags: impl Display) -> Result {
         out!(self, "rustc-flags={flags}")
     }
 
     /// Enables compile-time cfg settings.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-cfg
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-cfg>
     pub fn rustc_cfg(&mut self, key: impl Display, value: Option<impl Display>) -> Result {
         match value {
             Some(value) => out!(self, "rustc-cfg={key}={value}"),
@@ -140,28 +140,28 @@ impl Cargo {
 
     /// Sets an environment variable.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-env
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-env>
     pub fn rustc_env(&mut self, var: impl Display, value: impl Display) -> Result {
         out!(self, "rustc-env={var}={value}")
     }
 
     /// Passes custom flags to a linker for cdylib crates.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-cdylib-link-arg
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-cdylib-link-arg>
     pub fn rustc_cdylib_link_arg(&mut self, flag: impl Display) -> Result {
         out!(self, "rustc-cdylib-link-arg={flag}")
     }
 
     /// Displays a warning on the terminal.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#cargo-warning
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#cargo-warning>
     pub fn warning(&mut self, message: impl Display) -> Result {
         out!(self, "warning={message}")
     }
 
     /// Metadata, used by links scripts.
     ///
-    /// https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key
+    /// <https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key>
     pub fn metadata(&mut self, key: impl Display, value: impl Display) -> Result {
         out!(self, "{key}={value}")
     }
@@ -174,12 +174,12 @@ mod tests {
 
     /// Creates a [`Cargo`] that uses an in-memory buffer for output.
     fn cargo_buffer() -> Cargo {
-        Cargo(Prefix { prefix: "cargo:".into(), out: Out::Buffer(Vec::new()) })
+        Cargo { inner: Prefix { prefix: "cargo:".into(), out: Out::Buffer(Vec::new()) } }
     }
 
     /// Grab the buffer as a [`String`].
     fn buffer_value(cargo: &Cargo) -> String {
-        match &cargo.0.out {
+        match &cargo.inner.out {
             Out::Buffer(buffer) => String::from_utf8_lossy(buffer).to_string(),
 
             // we don't need to error, being empty should already be a bad match content-wise
