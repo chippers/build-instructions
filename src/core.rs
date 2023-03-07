@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::fmt::{Arguments, Display};
+use std::fmt::Arguments;
 use std::io::{IoSlice, Stdout, StdoutLock, Write};
 
 /// How a tool identifies a build instruction and where to output it.
