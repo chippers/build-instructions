@@ -2,12 +2,20 @@ use std::borrow::Cow;
 use std::fmt::{Arguments, Display};
 use std::io::{IoSlice, Stdout, StdoutLock, Write};
 
+/// How a tool identifies a build instruction and where to output it.
+///
+/// ```
+/// # use build_instructions::core::{Prefix};
+/// // create a prefix used for cargo on stdout
+/// let prefix = Prefix { prefix: "cargo:".into(), ..Default::default()};
+/// assert_eq!(format!("{}instruction=value", prefix.prefix), "cargo:instruction=value");
+/// ```
 #[derive(Debug, Default)]
 pub struct Prefix {
     /// The prefix for all instructions.
     ///
     /// e.g. `cargo:` for [Cargo's instructions]. Note that if the prefix has a delimiter, such
-    /// as `:` in `cargo:`, then this value should include it.
+    /// as `:` in `cargo:`, then this value **should include it**.
     ///
     /// [Cargo's instructions]: https://doc.rust-lang.org/cargo/reference/build-scripts.html#outputs-of-the-build-script
     pub prefix: Cow<'static, str>,
