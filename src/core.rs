@@ -90,12 +90,22 @@ pub struct OutLock(Option<StdoutLock<'static>>);
 impl Out {
     /// Lock the output, if applicable.
     ///
-    /// This does nothing to a [`Out::Buffer`].
+    /// This currently only flushed [`Out::Stdout`].
     pub fn lock(&self) -> OutLock {
         OutLock(match self {
             Self::Stdout(stdout) => Some(stdout.lock()),
             Self::Buffer(_) => None,
         })
+    }
+
+    /// Flush the output, if applicable.
+    ///
+    /// This currently only flushes [`Out::Stdout`].
+    pub fn flush(&mut self) -> std::io::Result<()> {
+        match self {
+            Self::Stdout(stdout) => stdout.flush(),
+            _ => Ok(()),
+        }
     }
 }
 

@@ -36,6 +36,7 @@ macro_rules! out {
         write!(out, "{}", $self.inner.prefix)?;
         writeln!(out, $($arg)*)?;
         drop(lock);
+        out.flush()?;
 
         Ok(())
     }}
