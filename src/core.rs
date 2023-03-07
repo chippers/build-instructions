@@ -108,24 +108,3 @@ impl Out {
         }
     }
 }
-
-/// Represents a specific instruction for any prefix.
-pub struct Instruction<K: Display, V: Display> {
-    /// The name of the instruction.
-    ///
-    /// e.g. `rerun-if-changed` in [`cargo:rerun-if-changed=PATH`]. This value should **NOT**
-    /// include an equals (`=`) delimiter at the end.
-    ///
-    /// [`cargo:rerun-if-changed=PATH`]: https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-changed
-    pub name: Cow<'static, str>,
-
-    /// Any format of values set for this specific instruction.
-    ///
-    /// e.g. `PATH`in
-    pub value: Value<K, V>,
-}
-
-pub enum Value<K: Display, V: Display> {
-    Value(V),
-    KeyValue(K, V),
-}
