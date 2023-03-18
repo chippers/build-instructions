@@ -4,7 +4,7 @@ use std::borrow::Cow;
 use std::fmt::Display;
 use std::io::Write;
 
-use crate::core::Prefix;
+use crate::core::{Out, Prefix};
 
 type Result = std::io::Result<()>;
 
@@ -16,7 +16,7 @@ pub struct Cargo {
 impl Default for Cargo {
     #[inline(always)]
     fn default() -> Self {
-        Self { inner: Prefix { prefix: Cow::Borrowed("cargo:"), ..Default::default() } }
+        Self::new(Default::default())
     }
 }
 
@@ -43,6 +43,12 @@ macro_rules! out {
 }
 
 impl Cargo {
+    /// Create a new raw [`Cargo`] with a specified output [`Out`].
+    #[inline(always)]
+    pub fn new(out: Out) -> Self {
+        Self { inner: Prefix { prefix: Cow::Borrowed("cargo:"), out } }
+    }
+
     /// Turn [`Cargo`] into the [`Prefix`] it was wrapping.
     #[inline(always)]
     pub fn into_inner(self) -> Prefix {
@@ -171,11 +177,10 @@ impl Cargo {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Out;
 
-    /// Creates a [`Cargo`] that uses an in-memory buffer for output.
+    /// Creates a raw [`Cargo`] that uses an in-memory buffer for output.
     fn cargo_buffer() -> Cargo {
-        Cargo { inner: Prefix { prefix: "cargo:".into(), out: Out::Buffer(Vec::new()) } }
+        Cargo::new(Out::Buffer(Vec::with_capacity(64)))
     }
 
     /// Grab the buffer as a [`String`].
