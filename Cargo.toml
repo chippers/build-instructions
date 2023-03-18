@@ -3,6 +3,7 @@ name = "build-instructions"
 authors = ["Chip Reed <chip@chip.sh>"]
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR APACHE-2.0"
 
 [dev-dependencies]
 tempfile = "3"
